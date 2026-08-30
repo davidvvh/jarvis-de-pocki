@@ -8,7 +8,7 @@ from google import genai
 API_KEY = "AQ.Ab8RN6LIWzmHWipIgClYKsOQdEN5GLmRkAtv1CueQZgmpXDA0w"
 client = genai.Client(api_key=API_KEY)
 
-PALABRA_CLAVE = ["despierta deki"]
+PALABRA_CLAVE = ["despierta"]
 
 engine = pyttsx3.init()
 voices = engine.getProperty('voices')
@@ -28,11 +28,15 @@ def hablar(texto):
 def escuchar():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
-        recognizer.adjust_for_ambient_noise(source, duration=0.8)
+        recognizer.adjust_for_ambient_noise(source, duration=1)
+        print("Escuchando...")
+        audio = recognizer.listen(source)
         try:
             audio = recognizer.listen(source, timeout=5, phrase_time_limit=8)
-            texto = recognizer.recognize_google(audio, language="es-ES")
-            return texto.lower()
+            texto_escuchado = recognizer.recognize_google(audio, language="es-ES").lower()
+            if "pocki" in texto_escuchado:
+                print(f"Dijiste: {texto_escuchado}")
+                return texto_escuchado.lower()
         except (sr.UnknownValueError, sr.WaitTimeoutError):
             return ""
         except sr.RequestError:
@@ -72,6 +76,7 @@ def iniciar_asistente():
     print(">>> Asistente activo con soporte para teléfono (ADB)...")
     while True:
         oído = escuchar()
+        
         if any(palabra in oído for palabra in PALABRA_CLAVE):
             hablar("Te escucho, ¿qué necesitas?")
             orden = escuchar()
