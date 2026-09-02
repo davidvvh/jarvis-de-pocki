@@ -28,19 +28,14 @@ def hablar(texto):
 def escuchar():
     recognizer = sr.Recognizer()
     with sr.Microphone() as source:
-        recognizer.adjust_for_ambient_noise(source, duration=1)
         print("Escuchando...")
-        audio = recognizer.listen(source)
         try:
             audio = recognizer.listen(source, timeout=5, phrase_time_limit=8)
-            texto_escuchado = recognizer.recognize_google(audio, language="es-ES").lower()
-            if "pocki" in texto_escuchado:
-                print(f"Dijiste: {texto_escuchado}")
-                return texto_escuchado.lower()
-        except (sr.UnknownValueError, sr.WaitTimeoutError):
+            texto = recognizer.recognize_google(audio, language="es-ES").lower()
+            return texto
+        except Exception as e:
             return ""
-        except sr.RequestError:
-            return ""
+    return ""
 
 #control del telefono mediante ADB
 def ejecutar_comando_adb(comando):
@@ -76,8 +71,7 @@ def iniciar_asistente():
     print(">>> Asistente activo con soporte para teléfono (ADB)...")
     while True:
         oído = escuchar()
-        
-        if any(palabra in oído for palabra in PALABRA_CLAVE):
+        if oído and any(palabra in oído for palabra in PALABRA_CLAVE):
             hablar("Te escucho, ¿qué necesitas?")
             orden = escuchar()
             if not orden:
